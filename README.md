@@ -1,63 +1,179 @@
 # CivicFix Backend MVP
 
-CivicFix is a civic issue reporting API for the Zerops Developer Challenge. The current scope is backend-only: residents can submit community maintenance reports and track their status through a PostgreSQL-backed REST API.
+CivicFix is a civic issue reporting API built for the Zerops Developer Challenge. Residents can submit local maintenance problems—such as potholes, broken streetlights, garbage, water leaks, and damaged infrastructure—and track each report through resolution.
 
-Frontend development, authentication, uploads, AI, workers, and Redis are intentionally out of scope for this phase.
+## Current status
 
-## Stack
+The backend MVP is complete and ready for deployment testing on Zerops:
+
+- FastAPI REST API with Swagger/OpenAPI documentation
+- PostgreSQL persistence through SQLAlchemy and Psycopg 3
+- Alembic database migrations
+- Report creation, listing, retrieval, and status updates
+- Environment-based database and CORS configuration
+- Python 3.12 Zerops pipeline for the existing `api` service
+- Automated endpoint tests
+
+Frontend development, authentication, uploads, AI, Redis, and background workers are intentionally outside the current scope.
+
+## Technology stack
 
 - Python 3.12
 - FastAPI and Uvicorn
-- PostgreSQL, SQLAlchemy, and Psycopg 3
+- PostgreSQL 18
+- SQLAlchemy 2 and Psycopg 3
 - Pydantic Settings
 - Alembic
 - Pytest
 
-## API
+## Project structure
+
+```text
+backend/
+├── alembic/               # Database migration environment and revisions
+├── app/
+│   ├── api/               # FastAPI route handlers
+│   ├── models/            # SQLAlchemy persistence models
+│   ├── repositories/      # Database access
+│   ├── schemas/           # Pydantic request and response models
+│   ├── services/          # Business rules and HTTP errors
+│   ├── config.py          # Environment-based settings
+│   ├── database.py        # Engine, sessions, and declarative base
+│   └── main.py            # FastAPI application and CORS
+├── tests/                 # API tests
+├── alembic.ini
+├── requirements.txt
+└── start.py               # PORT-aware production entry point
+```
+
+## API endpoints
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/health` | Service health check |
-| `POST` | `/api/reports` | Create a civic report |
-| `GET` | `/api/reports` | List reports |
+| `GET` | `/api/health` | Return API health status |
+| `POST` | `/api/reports` | Create a report |
+| `GET` | `/api/reports` | List all reports |
 | `GET` | `/api/reports/{id}` | Retrieve one report |
 | `PATCH` | `/api/reports/{id}/status` | Update report status |
 
-Interactive API documentation is available at `/docs`; the generated OpenAPI schema is available at `/openapi.json`.
+Swagger UI is available at `/docs`, ReDoc at `/redoc`, and the generated schema at `/openapi.json`.
 
-## Local setup
+### Report values
 
-From the repository root:
+Categories:
+
+`ROAD`, `STREETLIGHT`, `GARBAGE`, `WATER`, `INFRASTRUCTURE`, `OTHER`
+
+Severity levels:
+
+`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`
+
+Statuses:
+
+`REPORTED`, `UNDER_REVIEW`, `ASSIGNED`, `IN_PROGRESS`, `RESOLVED`
+
+### Create a report
+
+```http
+POST /api/reports
+Content-Type: application/json
+```
+
+```json
+{
+  "title": "Large pothole near junction",
+  "description": "A deep pothole is forcing vehicles into the opposite lane.",
+  "category": "ROAD",
+  "severity": "HIGH",
+  "latitude": 28.6139,
+  "longitude": 77.209
+}
+```
+
+New reports receive the `REPORTED` status automatically.
+
+### Update report status
+
+```json
+{
+  "status": "UNDER_REVIEW"
+}
+```
+
+## Local development
+
+Requirements:
+
+- Python 3.12
+- Docker Desktop with Docker Compose
+
+Start PostgreSQL from the repository root:
 
 ```powershell
 docker compose up -d db
+docker compose ps
+```
+
+Create the backend environment and install dependencies:
+
+```powershell
 cd backend
-python -m venv .venv
+py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt -r requirements-dev.txt
 Copy-Item .env.example .env
+```
+
+Apply database migrations:
+
+```powershell
 python -m alembic upgrade head
+```
+
+Start the development API:
+
+```powershell
 python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Run tests from `backend/`:
+Open `http://localhost:8000/docs`.
+
+## Tests
+
+From `backend/` with the virtual environment activated:
 
 ```powershell
 python -m pytest -q
 ```
 
-## Configuration
+The current suite covers health checks, report creation, report listing, individual report retrieval, status updates, input validation, missing reports, and resolved-report protection.
 
-The backend reads configuration from environment variables or `backend/.env`:
+## Environment variables
 
-- `DATABASE_URL`: SQLAlchemy database URL. Zerops can supply `${db_connectionString}`.
-- `CORS_ORIGINS`: comma-separated list of allowed frontend origins.
-- `ENVIRONMENT`: runtime environment name.
-- `PORT`: runtime HTTP port, defaulting to `8000` in `backend/start.py`.
+| Variable | Purpose | Local default |
+| --- | --- | --- |
+| `DATABASE_URL` | SQLAlchemy database connection | `postgresql+psycopg://civicfix:civicfix@localhost:5432/civicfix` |
+| `CORS_ORIGINS` | Comma-separated allowed browser origins | `http://localhost:3000` |
+| `ENVIRONMENT` | Runtime environment label | `development` |
+| `PORT` | HTTP port used by `backend/start.py` | `8000` |
 
-Do not commit real credentials or a populated `.env` file.
+Never commit real credentials or a populated `.env` file.
 
-## Zerops
+## Zerops deployment
 
-The root `zerops.yaml` targets the existing `api` Python 3.12 service, installs backend dependencies, applies migrations during startup, exposes HTTP port 8000, and checks `/api/health`. It receives the PostgreSQL connection string from the existing `db` service.
+The root `zerops.yaml` targets the services already created in the `civicfix` project:
+
+- `api`: Python 3.12 runtime
+- `db`: PostgreSQL 18.1
+
+The `api` setup:
+
+- installs backend dependencies during the build
+- receives `DATABASE_URL` from `${db_connectionString}`
+- applies Alembic migrations before starting
+- listens on `0.0.0.0` and uses `PORT`, defaulting to `8000`
+- exposes port 8000 with HTTP support
+- checks `/api/health`
+
+Deployment remains a manual step: connect the public GitHub repository to the existing Zerops `api` service when ready.
