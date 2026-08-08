@@ -24,3 +24,38 @@ zerops:
         httpGet:
           port: 8000
           path: /api/health
+
+  - setup: web
+    build:
+      base: alpine/nodejs@24
+
+      buildCommands:
+        - cd frontend
+        - npm ci
+        - npm run build
+
+      deployFiles:
+        - frontend/.next
+        - frontend/public
+        - frontend/package.json
+        - frontend/package-lock.json
+        - frontend/node_modules
+        - frontend/next.config.mjs
+
+    run:
+      base: alpine/nodejs@24
+
+      ports:
+        - port: 3000
+          httpSupport: true
+
+      envVariables:
+        NODE_ENV: production
+        NEXT_PUBLIC_API_URL: https://api-2beb-8000.prg1.zerops.app
+
+      start: cd frontend && npm start
+
+      healthCheck:
+        httpGet:
+          port: 3000
+          path: /
