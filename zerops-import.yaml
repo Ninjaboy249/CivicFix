@@ -1,0 +1,16 @@
+project:
+  name: civicfix
+  description: AI-assisted civic issue reporting and tracking
+  tags:
+    - civic-tech
+services:
+  - hostname: frontend
+    type: nodejs@20
+    enableSubdomainAccess: true
+  - hostname: backend
+    type: python@3.12
+    enableSubdomainAccess: true
+  - hostname: db
+    type: postgresql:single@18
+    profile: oltp-staging
+
