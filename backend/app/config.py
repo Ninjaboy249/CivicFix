@@ -9,8 +9,6 @@ class Settings(BaseSettings):
     environment: str = "development"
     cors_origins: str = "http://localhost:3000"
     database_url: str = "postgresql+psycopg://civicfix:civicfix@localhost:5432/civicfix"
-    openai_api_key: str | None = None
-    openai_model: str = "gpt-5.6"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

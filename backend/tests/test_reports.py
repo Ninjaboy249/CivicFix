@@ -3,56 +3,63 @@ import uuid
 
 def create_report(client, **overrides):
     payload = {
+        "title": "Deep pothole on Market Street",
         "description": "A deep pothole is blocking the left side of the road.",
-        "location": "12 Market Street",
+        "category": "ROAD",
+        "severity": "HIGH",
+        "latitude": 28.6139,
+        "longitude": 77.2090,
         **overrides,
     }
     return client.post("/api/reports", json=payload)
 
 
-def test_create_and_get_report(client):
+def test_create_report(client):
     created = create_report(client)
     assert created.status_code == 201
     body = created.json()
     uuid.UUID(body["id"])
-    assert body["status"] == "reported"
-    assert body["status_history"][0]["status"] == "reported"
+    assert body["status"] == "REPORTED"
+    assert body["category"] == "ROAD"
+    assert body["latitude"] == 28.6139
+
+
+def test_retrieve_reports(client):
+    create_report(client)
+    create_report(client, title="Broken streetlight", category="STREETLIGHT", severity="MEDIUM")
+
+    response = client.get("/api/reports")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+
+def test_retrieve_single_report(client):
+    body = create_report(client).json()
 
     fetched = client.get(f"/api/reports/{body['id']}")
     assert fetched.status_code == 200
     assert fetched.json()["description"] == body["description"]
 
 
-def test_list_search_and_filters(client):
-    create_report(client, title="Broken light", category="streetlight", severity="high")
-    create_report(client, title="Road damage", category="road", severity="medium")
-
-    response = client.get("/api/reports", params={"search": "light", "category": "streetlight"})
-    assert response.status_code == 200
-    assert response.json()["total"] == 1
-    assert response.json()["items"][0]["title"] == "Broken light"
-
-
-def test_update_status_appends_history(client):
+def test_update_report_status(client):
     report_id = create_report(client).json()["id"]
     response = client.patch(
         f"/api/reports/{report_id}/status",
-        json={"status": "under_review", "note": "Location confirmed"},
+        json={"status": "UNDER_REVIEW"},
     )
     assert response.status_code == 200
-    body = response.json()
-    assert body["status"] == "under_review"
-    assert [entry["status"] for entry in body["status_history"]] == ["reported", "under_review"]
+    assert response.json()["status"] == "UNDER_REVIEW"
 
 
 def test_rejects_invalid_input_and_missing_report(client):
     assert create_report(client, description="short").status_code == 422
+    assert create_report(client, latitude=91).status_code == 422
     assert client.get(f"/api/reports/{uuid.uuid4()}").status_code == 404
 
 
 def test_resolved_report_cannot_be_reopened(client):
     report_id = create_report(client).json()["id"]
-    assert client.patch(f"/api/reports/{report_id}/status", json={"status": "resolved"}).status_code == 200
-    response = client.patch(f"/api/reports/{report_id}/status", json={"status": "in_progress"})
+    assert client.patch(f"/api/reports/{report_id}/status", json={"status": "RESOLVED"}).status_code == 200
+    response = client.patch(f"/api/reports/{report_id}/status", json={"status": "IN_PROGRESS"})
     assert response.status_code == 409
-

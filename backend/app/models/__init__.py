@@ -1,4 +1,3 @@
-from app.models.report import Report, ReportStatusHistory
+from app.models.report import Report
 
-__all__ = ["Report", "ReportStatusHistory"]
-
+__all__ = ["Report"]

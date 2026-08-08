@@ -1,31 +1,5 @@
 zerops:
-  - setup: frontend
-    build:
-      base: nodejs@20
-      buildCommands:
-        - cd frontend && npm ci
-        - cd frontend && npm run build
-      deployFiles:
-        - frontend/.next/standalone/.
-        - frontend/.next/static
-        - frontend/public
-    run:
-      base: nodejs@20
-      ports:
-        - port: 3000
-          httpSupport: true
-      envVariables:
-        NODE_ENV: production
-        PORT: "3000"
-        HOSTNAME: 0.0.0.0
-        NEXT_PUBLIC_API_URL: http://backend:8000
-      start: node frontend/server.js
-      healthCheck:
-        httpGet:
-          port: 3000
-          path: /
-
-  - setup: backend
+  - setup: api
     build:
       base: python@3.12
       buildCommands:
@@ -39,10 +13,9 @@ zerops:
           httpSupport: true
       envVariables:
         ENVIRONMENT: production
-        CORS_ORIGINS: ${frontend_zeropsSubdomain}
         PYTHONPATH: backend/vendor
         DATABASE_URL: ${db_connectionString}
-      start: python -m alembic -c backend/alembic.ini upgrade head && python -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000
+      start: python -m alembic -c backend/alembic.ini upgrade head && python backend/start.py
       healthCheck:
         httpGet:
           port: 8000
