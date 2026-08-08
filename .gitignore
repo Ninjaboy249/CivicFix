@@ -2,9 +2,14 @@ node_modules/
 .next/
 frontend/.env.local
 backend/.venv/
+backend/vendor/
 backend/__pycache__/
 backend/.pytest_cache/
+backend/**/__pycache__/
 *.py[cod]
 *.db
 .env
+.env.*
+!.env.example
+venv/
 .DS_Store

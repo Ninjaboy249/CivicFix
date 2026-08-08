@@ -2,6 +2,10 @@
 
 CivicFix is a civic issue reporting API built for the Zerops Developer Challenge. Residents can submit local maintenance problems—such as potholes, broken streetlights, garbage, water leaks, and damaged infrastructure—and track each report through resolution.
 
+## Problem it solves
+
+Community maintenance problems are often reported through disconnected channels with incomplete information and no consistent status trail. CivicFix establishes one validated report format and a predictable status workflow that future resident and operator interfaces can share.
+
 ## Current status
 
 The backend MVP is complete and ready for deployment testing on Zerops:
@@ -58,6 +62,8 @@ backend/
 
 Swagger UI is available at `/docs`, ReDoc at `/redoc`, and the generated schema at `/openapi.json`.
 
+`GET /api/reports` accepts optional `category`, `severity`, and `status` query parameters. Values are validated against the enums below and can be combined.
+
 ### Report values
 
 Categories:
@@ -91,6 +97,8 @@ Content-Type: application/json
 ```
 
 New reports receive the `REPORTED` status automatically.
+
+`latitude` and `longitude` are optional. When provided, latitude must be between -90 and 90 and longitude between -180 and 180.
 
 ### Update report status
 
@@ -149,11 +157,13 @@ python -m pytest -q
 
 The current suite covers health checks, report creation, report listing, individual report retrieval, status updates, input validation, missing reports, and resolved-report protection.
 
+Tests use an isolated in-memory SQLite database through FastAPI's database dependency override. This keeps endpoint tests deterministic and does not replace PostgreSQL in the application or deployment. PostgreSQL migration and persistence behavior should also be verified locally before deployment.
+
 ## Environment variables
 
-| Variable | Purpose | Local default |
+| Variable | Purpose | Local example/default |
 | --- | --- | --- |
-| `DATABASE_URL` | SQLAlchemy database connection | `postgresql+psycopg://civicfix:civicfix@localhost:5432/civicfix` |
+| `DATABASE_URL` | Required SQLAlchemy database connection | `postgresql+psycopg://civicfix:civicfix@localhost:5432/civicfix` |
 | `CORS_ORIGINS` | Comma-separated allowed browser origins | `http://localhost:3000` |
 | `ENVIRONMENT` | Runtime environment label | `development` |
 | `PORT` | HTTP port used by `backend/start.py` | `8000` |
@@ -177,3 +187,16 @@ The `api` setup:
 - checks `/api/health`
 
 Deployment remains a manual step: connect the public GitHub repository to the existing Zerops `api` service when ready.
+
+## Current limitations
+
+- There is no frontend or resident-facing submission form.
+- There is no authentication or authorization.
+- Reports cannot include images or attachments.
+- Status changes are not stored as a separate audit history.
+- The list endpoint does not yet paginate.
+- Tests cover API behavior with SQLite; a PostgreSQL integration test environment is still recommended.
+
+## Planned AI functionality
+
+AI is not implemented in Phase 1. A later phase may use a server-side provider integration to suggest a report title, category, severity, and missing details from natural-language descriptions and optional images. Provider credentials will remain in environment variables, outputs will be validated before use, and residents will review suggestions before submitting a report.
