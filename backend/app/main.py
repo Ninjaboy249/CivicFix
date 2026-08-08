@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
-from app.api.analysis import router as analysis_router
 from app.api.reports import router as reports_router
 from app.config import get_settings
 
@@ -17,5 +16,4 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 app.include_router(health_router, prefix="/api")
-app.include_router(analysis_router, prefix="/api")
 app.include_router(reports_router, prefix="/api")

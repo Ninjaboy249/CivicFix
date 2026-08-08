@@ -23,8 +23,7 @@ class ReportService:
     def update_status(self, report_id: uuid.UUID, payload: StatusUpdate) -> Report:
         report = self.get(report_id)
         if report.status == ReportStatus.RESOLVED.value and payload.status != ReportStatus.RESOLVED:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Resolved reports cannot be reopened in Phase 2")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Resolved reports cannot be reopened")
         if report.status == payload.status.value:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Report already has this status")
-        return self.repository.update_status(report, payload.status.value, payload.note)
-
+        return self.repository.update_status(report, payload.status.value)
