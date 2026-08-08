@@ -1,21 +1,25 @@
 zerops:
   - setup: api
     build:
-      base: python@3.12
+      base: ubuntu/python@3.12
       buildCommands:
         - python -m pip install --target backend/vendor -r backend/requirements.txt
       deployFiles:
-        - backend
+        - ./backend
+
     run:
-      base: python@3.12
+      base: ubuntu/python@3.12
       ports:
         - port: 8000
           httpSupport: true
+
       envVariables:
         ENVIRONMENT: production
         PYTHONPATH: backend/vendor
         DATABASE_URL: ${db_connectionString}
-      start: python -m alembic -c backend/alembic.ini upgrade head && python backend/start.py
+
+      start: python backend/start.py
+
       healthCheck:
         httpGet:
           port: 8000

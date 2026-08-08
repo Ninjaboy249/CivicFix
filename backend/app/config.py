@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     app_name: str = "CivicFix API"
     environment: str = "development"
     cors_origins: str = "http://localhost:3000"
-    database_url: str = "postgresql+psycopg://civicfix:civicfix@localhost:5432/civicfix"
+    database_url: str
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

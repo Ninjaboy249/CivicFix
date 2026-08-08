@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.report import Report, ReportStatus
+from app.models.report import Report, ReportCategory, ReportSeverity, ReportStatus
 from app.schemas.report import ReportCreate
 
 
@@ -21,8 +21,21 @@ class ReportRepository:
     def get(self, report_id: uuid.UUID) -> Report | None:
         return self.db.get(Report, report_id)
 
-    def list(self) -> list[Report]:
-        return list(self.db.scalars(select(Report).order_by(Report.created_at.desc())))
+    def list(
+        self,
+        *,
+        category: ReportCategory | None = None,
+        severity: ReportSeverity | None = None,
+        status: ReportStatus | None = None,
+    ) -> list[Report]:
+        statement = select(Report)
+        if category is not None:
+            statement = statement.where(Report.category == category.value)
+        if severity is not None:
+            statement = statement.where(Report.severity == severity.value)
+        if status is not None:
+            statement = statement.where(Report.status == status.value)
+        return list(self.db.scalars(statement.order_by(Report.created_at.desc())))
 
     def update_status(self, report: Report, status: str) -> Report:
         report.status = status

@@ -11,8 +11,8 @@ class ReportCreate(BaseModel):
     description: str = Field(min_length=10, max_length=5000)
     category: ReportCategory
     severity: ReportSeverity
-    latitude: float = Field(ge=-90, le=90)
-    longitude: float = Field(ge=-180, le=180)
+    latitude: float | None = Field(default=None, ge=-90, le=90)
+    longitude: float | None = Field(default=None, ge=-180, le=180)
 
 
 class StatusUpdate(BaseModel):
@@ -27,8 +27,8 @@ class ReportResponse(BaseModel):
     description: str
     category: ReportCategory
     severity: ReportSeverity
-    latitude: float
-    longitude: float
+    latitude: float | None
+    longitude: float | None
     status: ReportStatus
     created_at: datetime
     updated_at: datetime

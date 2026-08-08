@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.report import ReportCategory, ReportSeverity, ReportStatus
 from app.repositories.reports import ReportRepository
 from app.schemas.report import ReportCreate, ReportResponse, StatusUpdate
 from app.services.reports import ReportService
@@ -19,8 +20,13 @@ def create_report(payload: ReportCreate, db: DbSession) -> ReportResponse:
 
 
 @router.get("", response_model=list[ReportResponse])
-def list_reports(db: DbSession) -> list[ReportResponse]:
-    return ReportRepository(db).list()
+def list_reports(
+    db: DbSession,
+    category: ReportCategory | None = None,
+    severity: ReportSeverity | None = None,
+    status: ReportStatus | None = None,
+) -> list[ReportResponse]:
+    return ReportRepository(db).list(category=category, severity=severity, status=status)
 
 
 @router.get("/{report_id}", response_model=ReportResponse)

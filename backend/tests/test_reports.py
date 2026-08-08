@@ -34,6 +34,20 @@ def test_retrieve_reports(client):
     assert len(response.json()) == 2
 
 
+def test_filter_reports(client):
+    create_report(client)
+    create_report(client, title="Broken streetlight", category="STREETLIGHT", severity="MEDIUM")
+
+    response = client.get(
+        "/api/reports",
+        params={"category": "STREETLIGHT", "severity": "MEDIUM", "status": "REPORTED"},
+    )
+
+    assert response.status_code == 200
+    assert len(response.json()) == 1
+    assert response.json()[0]["category"] == "STREETLIGHT"
+
+
 def test_retrieve_single_report(client):
     body = create_report(client).json()
 
@@ -56,6 +70,23 @@ def test_rejects_invalid_input_and_missing_report(client):
     assert create_report(client, description="short").status_code == 422
     assert create_report(client, latitude=91).status_code == 422
     assert client.get(f"/api/reports/{uuid.uuid4()}").status_code == 404
+
+
+def test_rejects_invalid_category(client):
+    response = create_report(client, category="PARKING")
+    assert response.status_code == 422
+
+
+def test_rejects_invalid_severity(client):
+    response = create_report(client, severity="URGENT")
+    assert response.status_code == 422
+
+
+def test_coordinates_are_optional(client):
+    response = create_report(client, latitude=None, longitude=None)
+    assert response.status_code == 201
+    assert response.json()["latitude"] is None
+    assert response.json()["longitude"] is None
 
 
 def test_resolved_report_cannot_be_reopened(client):
