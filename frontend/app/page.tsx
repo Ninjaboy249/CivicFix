@@ -18,7 +18,7 @@ export default function Home() {
           <h1 className="max-w-3xl text-5xl font-bold leading-[1.04] tracking-[-0.04em] text-emerald-950 sm:text-7xl">Make community problems visible.</h1>
           <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-600">CivicFix helps residents report damaged roads, broken streetlights, waste problems, water leaks, and other public infrastructure issues—then track what happens next.</p>
           <div className="mt-9 flex flex-wrap gap-4">
-            <a href="#phase-one" className="rounded-full bg-emerald-800 px-7 py-3.5 font-bold text-white shadow-sm hover:bg-emerald-900 focus:outline-none focus:ring-4 focus:ring-emerald-200">Report an issue</a>
+            <a href="#phase-three" className="rounded-full bg-emerald-800 px-7 py-3.5 font-bold text-white shadow-sm hover:bg-emerald-900 focus:outline-none focus:ring-4 focus:ring-emerald-200">Explore Phase 3</a>
             <a href="#how-it-works" className="rounded-full border border-slate-300 bg-white px-7 py-3.5 font-bold text-slate-800 hover:border-emerald-700">See how it works</a>
           </div>
         </div>
@@ -48,10 +48,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="phase-one" className="mx-auto max-w-6xl px-6 py-20">
-        <div className="rounded-3xl border border-amber-200 bg-amber-50 px-7 py-8 sm:flex sm:items-center sm:justify-between sm:gap-8">
-          <div><h2 className="text-2xl font-bold text-amber-950">Reporting is coming in the next phase</h2><p className="mt-2 text-amber-900/80">This first foundation includes the public landing page and a working API health check. No reports are accepted or invented yet.</p></div>
-          <span className="mt-5 inline-block shrink-0 rounded-full bg-amber-200 px-4 py-2 text-sm font-bold text-amber-950 sm:mt-0">Phase 1</span>
+      <section id="phase-three" className="mx-auto max-w-6xl px-6 py-20">
+        <div className="rounded-3xl border border-emerald-200 bg-emerald-50 px-7 py-8 sm:flex sm:items-center sm:justify-between sm:gap-8">
+          <div><h2 className="text-2xl font-bold text-emerald-950">AI-assisted reporting is ready</h2><p className="mt-2 text-emerald-900/80">The API can create and track reports, while structured AI analysis suggests a clear title, category, severity, summary, missing details, and safety guidance.</p></div>
+          <span className="mt-5 inline-block shrink-0 rounded-full bg-emerald-200 px-4 py-2 text-sm font-bold text-emerald-950 sm:mt-0">Phase 3</span>
         </div>
       </section>
 
@@ -59,4 +59,3 @@ export default function Home() {
     </main>
   );
 }
-
