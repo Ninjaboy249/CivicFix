@@ -39,7 +39,8 @@ zerops:
   # =========================
   - setup: web
     build:
-      base: alpine/nodejs@24
+      os: alpine
+      base: nodejs@24
 
       buildCommands:
         - cd frontend && npm ci
@@ -53,7 +54,7 @@ zerops:
 
     run:
       os: alpine
-      base: alpine/nodejs@24
+      base: nodejs@24
 
       start: node frontend/.next/standalone/server.js
 
