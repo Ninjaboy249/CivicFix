@@ -38,20 +38,17 @@ zerops:
   # FRONTEND
   # =========================
   - setup: web
-
     build:
       base: alpine/nodejs@24
 
       buildCommands:
         - cd frontend && npm ci
         - cd frontend && npm run build
+        - cp -r frontend/public frontend/.next/standalone/public
+        - cp -r frontend/.next/static frontend/.next/standalone/.next/static
 
       deployFiles:
-        - ./frontend/.next
-        - ./frontend/public
-        - ./frontend/package.json
-        - ./frontend/node_modules
-        - ./frontend/next.config.mjs
+        - ./frontend/.next/standalone
 
       cache:
         - ./frontend/node_modules
@@ -65,9 +62,10 @@ zerops:
 
       envVariables:
         NODE_ENV: production
-        NEXT_PUBLIC_API_URL: http://api:8000
+        HOSTNAME: 0.0.0.0
+        PORT: 3000
 
-      start: cd frontend && npm start
+      start: node frontend/.next/standalone/server.js
 
       healthCheck:
         httpGet:
