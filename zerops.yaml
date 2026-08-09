@@ -44,9 +44,11 @@ zerops:
       buildCommands:
         - cd frontend && npm ci
         - cd frontend && npm run build
+        - cp -r frontend/public frontend/.next/standalone/public
+        - cp -r frontend/.next/static frontend/.next/standalone/.next/static
 
       deployFiles:
-        - ./frontend
+        - ./frontend/.next/standalone
 
       cache:
         - ./frontend/node_modules
@@ -60,8 +62,10 @@ zerops:
 
       envVariables:
         NODE_ENV: production
+        HOSTNAME: 0.0.0.0
+        PORT: 3000
 
-      start: cd frontend && npm start -- -H 0.0.0.0 -p 3000
+      start: node frontend/.next/standalone/server.js
 
       healthCheck:
         httpGet:
